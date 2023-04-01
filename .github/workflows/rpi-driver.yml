@@ -111,7 +111,7 @@ jobs:
     - name: Install dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install -y gawk qpdf adb flex bison make g++ gcc-arm-none-eabi libgmp3-dev xxd
+        sudo apt-get install -y gawk qpdf adb flex libfl-dev bison make g++ gcc-arm-none-eabi libgmp3-dev xxd
     - name: Build Pi firmware
       id: build_fw
       run: |
