@@ -88,7 +88,7 @@ jobs:
               sudo ln -fs /usr/arm-linux-gnueabihf/lib/ld-linux.so.3 /lib/ld-linux.so.3
             fi
             echo "Cross compiling" "$kver" "for arch" "$target_arch"
-            export NEXMON_ROOT="$(pwd)"s
+            export NEXMON_ROOT="$(pwd)"
             make ARCH=$target_arch CROSS_COMPILE="$cross" -j"$(nproc)" -C "$kernel_folder"/build M="$NEXMON_ROOT"/"$driver_base_path"/"$brcmfmac_ver" > log.txt && mkdir -p build/kalipi/"$kver"/ && cp "$driver_base_path"/"$brcmfmac_ver"/brcmfmac.ko build/kalipi/"$kver"/
             echo kernel_ver="$(echo "$kver" | cut -f 1 -d -)" >> $GITHUB_OUTPUT
           done
