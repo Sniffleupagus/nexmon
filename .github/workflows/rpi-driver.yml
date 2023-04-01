@@ -1,0 +1,48 @@
+name: Raspberry Pi Build
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+    name: Build Nexmon driver for Raspberry Pi
+    steps:
+    - uses: actions/checkout@v3
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y curl gnupg2
+        sudo apt-get install -y gcc-arm-linux-gnueabihf crossbuild-essential-arm64 make
+        sudo curl -fsSL http://archive.raspberrypi.org/debian/raspberrypi.gpg.key --output /usr/share/keyrings/raspberrypi.gpg.key
+        echo "deb [arch=amd64, signed-by=/usr/share/keyrings/raspberrypi.gpg.key] http://archive.raspberrypi.org/debian/ bullseye main" | sudo tee /etc/apt/sources.list.d/raspberrypi.list > /dev/null
+        sudo apt-get update
+        sudo apt-get install -y raspberrypi-kernel-headers
+    - name: Build Pi kernel drivers
+      id: build_raspberry
+      run: |
+        for kernel_folder in /lib/modules/*+; do
+          kver=$(basename "$kernel_folder")
+          brcmfmac_ver=brcmfmac_$(echo "$kver" | cut -f 1,2 -d .).y-nexmon
+          driver_base_path=patches/driver
+          [ ! -d "$driver_base_path"/"$brcmfmac_ver" ] && echo "Cannot find nexmon brcmfmac fo kernel $kver && continue"
+          if [[ $kver =~ "v8" ]]; then
+            target_arch="arm64"
+            cross="aarch64-linux-gnu-"
+          else
+            target_arch="arm"
+            cross="arm-linux-gnueabihf-"
+          fi
+          echo "Cross compiling" "$kver" "for arch" "$target_arch"
+          export NEXMON_ROOT="$(pwd)"
+          make ARCH=$target_arch CROSS_COMPILE="$cross" -j"$(nproc)" -C "$kernel_folder"/build M="$NEXMON_ROOT"/"$driver_base_path"/"$brcmfmac_ver" > log.txt && mkdir -p build/raspberrypi/"$kver"/ && cp "$driver_base_path"/"$brcmfmac_ver"/brcmfmac.ko build/raspberrypi/"$kver"/
+          echo kernel_ver="$(echo "$kver" | cut -f 1 -d -)" >> $GITHUB_OUTPUT
+        done
+    - name: Compress artifacts
+      run: |
+        tar czvf brcmfmac-raspberrypi-${{ steps.build_raspberry.outputs.kernel_ver }}.tar.gz -C build/raspberrypi/ .
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: RPi kernel drivers
+        path: brcmfmac*.tar.gz
