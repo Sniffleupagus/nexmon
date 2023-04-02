@@ -5,6 +5,9 @@ on:
 
 jobs:
   build:
+    strategy:
+      matrix:
+        version: ["buster", "bullseye"]
     runs-on: ubuntu-22.04
     name: Build Nexmon driver for Raspberry Pi
     steps:
@@ -15,7 +18,7 @@ jobs:
         sudo apt-get install -y curl gnupg2
         sudo apt-get install -y gcc-arm-linux-gnueabihf crossbuild-essential-arm64 make
         sudo curl -fsSL http://archive.raspberrypi.org/debian/raspberrypi.gpg.key --output /usr/share/keyrings/raspberrypi.gpg.key
-        echo "deb [arch=amd64, signed-by=/usr/share/keyrings/raspberrypi.gpg.key] http://archive.raspberrypi.org/debian/ bullseye main" | sudo tee /etc/apt/sources.list.d/raspberrypi.list > /dev/null
+        echo "deb [arch=amd64, signed-by=/usr/share/keyrings/raspberrypi.gpg.key] http://archive.raspberrypi.org/debian/ ${{ matrix.version }} main" | sudo tee /etc/apt/sources.list.d/raspberrypi.list > /dev/null
         sudo apt-get update
         sudo apt-get install -y raspberrypi-kernel-headers
     - name: Build Pi kernel drivers
@@ -44,7 +47,7 @@ jobs:
     - name: Upload artifacts
       uses: actions/upload-artifact@v3
       with:
-        name: RPi kernel drivers
+        name: RPi ${{ matrix.version }} kernel drivers
         path: brcmfmac*.tar.gz
 
 
