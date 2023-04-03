@@ -6116,7 +6116,6 @@ static int brcmf_construct_chaninfo(struct brcmf_cfg80211_info *cfg,
 			band->channels[i].flags = IEEE80211_CHAN_DISABLED;
 
 	total = le32_to_cpu(list->count);
-	brcmf_err("total %d\n", total);
 	for (i = 0; i < total; i++) {
 		ch.chspec = (u16)le32_to_cpu(list->element[i]);
 		cfg->d11inf.decchspec(&ch);
@@ -7104,8 +7103,6 @@ struct brcmf_cfg80211_info *brcmf_cfg80211_attach(struct brcmf_pub *drvr,
 	s32 io_type;
 	u16 *cap = NULL;
 
-	brcmf_enter("enter\n");
-
 	if (!ndev) {
 		brcmf_err("ndev is invalid\n");
 		return NULL;
@@ -7251,8 +7248,6 @@ struct brcmf_cfg80211_info *brcmf_cfg80211_attach(struct brcmf_pub *drvr,
 			wiphy->features |= NL80211_FEATURE_ND_RANDOM_MAC_ADDR;
 #endif
 	}
-
-	brcmf_exit("exit\n");
 
 	return cfg;
 

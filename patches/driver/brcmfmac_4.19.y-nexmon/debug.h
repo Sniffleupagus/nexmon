@@ -45,8 +45,6 @@
 #undef pr_fmt
 #define pr_fmt(fmt)		KBUILD_MODNAME ": " fmt
 
-extern int dbgspacesidx;
-
 __printf(2, 3)
 void __brcmf_err(const char *func, const char *fmt, ...);
 /* Macro for error messages. When debugging / tracing the driver all error
@@ -58,30 +56,6 @@ void __brcmf_err(const char *func, const char *fmt, ...);
 		    IS_ENABLED(CONFIG_BRCM_TRACING) ||			\
 		    net_ratelimit())					\
 			__brcmf_err(__func__, fmt, ##__VA_ARGS__);	\
-	} while (0)
-
-/* Macro for error messages. When debugging / tracing the driver all error
- * messages are important to us.
- */
-#define brcmf_enter(fmt, ...)						\
-	do {								\
-		if (IS_ENABLED(CONFIG_BRCMDBG) ||			\
-		    IS_ENABLED(CONFIG_BRCM_TRACING) ||			\
-		    net_ratelimit())					\
-		    dbgspacesidx--; \
-			__brcmf_err(__func__, fmt, ##__VA_ARGS__);	\
-	} while (0)
-
-/* Macro for error messages. When debugging / tracing the driver all error
- * messages are important to us.
- */
-#define brcmf_exit(fmt, ...)						\
-	do {								\
-		if (IS_ENABLED(CONFIG_BRCMDBG) ||			\
-		    IS_ENABLED(CONFIG_BRCM_TRACING) ||			\
-		    net_ratelimit())					\
-			__brcmf_err(__func__, fmt, ##__VA_ARGS__);	\
-			dbgspacesidx++; \
 	} while (0)
 
 #if defined(DEBUG) || defined(CONFIG_BRCM_TRACING)

@@ -1131,8 +1131,6 @@ static int brcmf_bus_started(struct brcmf_pub *drvr, struct cfg80211_ops *ops)
 	struct brcmf_if *ifp;
 	struct brcmf_if *p2p_ifp;
 
-	brcmf_enter("enter\n");
-
 	brcmf_dbg(TRACE, "\n");
 
 	/* add primary networking interface */
@@ -1204,8 +1202,6 @@ static int brcmf_bus_started(struct brcmf_pub *drvr, struct cfg80211_ops *ops)
 	brcmf_proto_debugfs_create(drvr);
 	brcmf_sdio_debugfs_create(drvr->bus_if->bus_priv.sdio->bus);
 
-	brcmf_exit("exit\n");
-
 	return 0;
 
 fail:
@@ -1232,8 +1228,6 @@ int brcmf_attach(struct device *dev, struct brcmf_mp_device *settings)
 	struct brcmf_pub *drvr = NULL;
 	int ret = 0;
 	int i;
-
-	brcmf_enter("enter\n");
 
 	brcmf_dbg(TRACE, "Enter\n");
 
@@ -1277,14 +1271,10 @@ int brcmf_attach(struct device *dev, struct brcmf_mp_device *settings)
 	ret = brcmf_bus_started(drvr, ops);
 	if (ret != 0) {
 		brcmf_err("dongle is not responding: err=%d\n", ret);
-		brcmf_sdio_readconsole(drvr->bus_if->bus_priv.sdio->bus);
 		goto fail;
 	}
 
 	drvr->config->ops = ops;
-
-	brcmf_exit("exit\n");
-
 	return 0;
 
 fail:
@@ -1423,23 +1413,20 @@ void brcmf_bus_change_state(struct brcmf_bus *bus, enum brcmf_bus_state state)
 
 static void brcmf_driver_register(struct work_struct *work)
 {
-	brcmf_enter("enter\n");
 #ifdef CONFIG_BRCMFMAC_SDIO
 	brcmf_sdio_register();
 #endif
 #ifdef CONFIG_BRCMFMAC_USB
-//	brcmf_usb_register();
+	brcmf_usb_register();
 #endif
 #ifdef CONFIG_BRCMFMAC_PCIE
 	brcmf_pcie_register();
 #endif
-	brcmf_exit("exit\n");
 }
 static DECLARE_WORK(brcmf_driver_work, brcmf_driver_register);
 
 int __init brcmf_core_init(void)
 {
-	brcmf_enter("enter\n");
 	if (!schedule_work(&brcmf_driver_work))
 		return -EBUSY;
 
@@ -1450,8 +1437,6 @@ int __init brcmf_core_init(void)
 		brcmf_err("NEXMON: %s: Error creating netlink socket\n", __FUNCTION__);
 		return -1;
 	}
-
-	brcmf_exit("enter\n");
 
 	return 0;
 }
@@ -1467,7 +1452,7 @@ void __exit brcmf_core_exit(void)
 	brcmf_sdio_exit();
 #endif
 #ifdef CONFIG_BRCMFMAC_USB
-//	brcmf_usb_exit();
+	brcmf_usb_exit();
 #endif
 #ifdef CONFIG_BRCMFMAC_PCIE
 	brcmf_pcie_exit();

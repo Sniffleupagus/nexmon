@@ -640,8 +640,6 @@ static const struct brcmf_firmware_mapping brcmf_sdio_fwnames[] = {
 	BRCMF_FW_ENTRY(CY_CC_4373_CHIP_ID, 0xFFFFFFFF, 4373)
 };
 
-int brcmf_sdio_readconsole(struct brcmf_sdio *bus);
-
 static void pkt_align(struct sk_buff *p, int len, int align)
 {
 	uint datalign;
@@ -966,7 +964,6 @@ done:
 #ifdef DEBUG
 static inline bool brcmf_sdio_valid_shared_address(u32 addr)
 {
-	brcmf_err("shared address: %08x\n", addr);
 	return !(addr == 0 || ((~addr >> 16) & 0xffff) == (addr & 0xffff));
 }
 
@@ -979,8 +976,6 @@ static int brcmf_sdio_readshared(struct brcmf_sdio *bus,
 	struct sdpcm_shared_le sh_le;
 	__le32 addr_le;
 
-	brcmf_enter("enter\n");
-
 	sdio_claim_host(bus->sdiodev->func1);
 	brcmf_sdio_bus_sleep(bus, false, false);
 
@@ -989,7 +984,6 @@ static int brcmf_sdio_readshared(struct brcmf_sdio *bus,
 	 * address of sdpcm_shared structure
 	 */
 	shaddr = bus->ci->rambase + bus->ci->ramsize - 4;
-	brcmf_err("shaddr %08x\n", shaddr);
 	if (!bus->ci->rambase && brcmf_chip_sr_capable(bus->ci))
 		shaddr -= bus->ci->srsize;
 	rv = brcmf_sdiod_ramrw(bus->sdiodev, false, shaddr,
@@ -1031,19 +1025,14 @@ static int brcmf_sdio_readshared(struct brcmf_sdio *bus,
 		brcmf_err("sdpcm shared version unsupported: dhd %d dongle %d\n",
 			  SDPCM_SHARED_VERSION,
 			  sh->flags & SDPCM_SHARED_VERSION_MASK);
-		brcmf_exit("exit 1\n");
 		return -EPROTO;
 	}
-
-	brcmf_exit("exit 2\n");
-
 	return 0;
 
 fail:
 	brcmf_err("unable to obtain sdpcm_shared info: rv=%d (addr=0x%x)\n",
 		  rv, addr);
 	sdio_release_host(bus->sdiodev->func1);
-	brcmf_exit("exit 3\n");
 	return rv;
 }
 
@@ -1069,8 +1058,6 @@ static u32 brcmf_sdio_hostmail(struct brcmf_sdio *bus)
 	u8 fcbits;
 	int ret;
 
-	brcmf_enter("enter\n");
-
 	brcmf_dbg(SDIO, "Enter\n");
 
 	/* Read mailbox data and ack that we did so */
@@ -1087,7 +1074,6 @@ static u32 brcmf_sdio_hostmail(struct brcmf_sdio *bus)
 	/* dongle indicates the firmware has halted/crashed */
 	if (hmb_data & HMB_DATA_FWHALT) {
 		brcmf_err("mailbox indicates firmware halted\n");
-		brcmf_sdio_readconsole(bus);
 		brcmf_dev_coredump(&sdiod->func1->dev);
 	}
 
@@ -1152,8 +1138,6 @@ static u32 brcmf_sdio_hostmail(struct brcmf_sdio *bus)
 			 HMB_DATA_FCDATA_MASK | HMB_DATA_VERSION_MASK))
 		brcmf_err("Unknown mailbox data content: 0x%02x\n",
 			  hmb_data);
-
-	brcmf_exit("exit\n");
 
 	return intstatus;
 }
@@ -2789,21 +2773,16 @@ static int brcmf_sdio_bus_txdata(struct device *dev, struct sk_buff *pkt)
 #ifdef DEBUG
 #define CONSOLE_LINE_MAX	192
 
-int brcmf_sdio_readconsole(struct brcmf_sdio *bus)
+static int brcmf_sdio_readconsole(struct brcmf_sdio *bus)
 {
 	struct brcmf_console *c = &bus->console;
 	u8 line[CONSOLE_LINE_MAX], ch;
 	u32 n, idx, addr;
 	int rv;
 
-	brcmf_enter("enter\n");
-
 	/* Don't do anything until FWREADY updates console address */
-	if (bus->console_addr == 0) {
-		brcmf_err("console_addr = 0\n");
-		brcmf_exit("exit\n");
+	if (bus->console_addr == 0)
 		return 0;
-	}
 
 	/* Read console log struct */
 	addr = bus->console_addr + offsetof(struct rte_console, log_le);
@@ -2866,8 +2845,6 @@ int brcmf_sdio_readconsole(struct brcmf_sdio *bus)
 		}
 	}
 break2:
-
-	brcmf_exit("exit\n");
 
 	return 0;
 }
@@ -3273,8 +3250,6 @@ static int brcmf_sdio_download_code_file(struct brcmf_sdio *bus,
 {
 	int err;
 
-	brcmf_enter("enter\n");
-
 	brcmf_dbg(TRACE, "Enter\n");
 
 	err = brcmf_sdiod_ramrw(bus->sdiodev, true, bus->ci->rambase,
@@ -3285,8 +3260,6 @@ static int brcmf_sdio_download_code_file(struct brcmf_sdio *bus,
 	else if (!brcmf_sdio_verifymemory(bus->sdiodev, bus->ci->rambase,
 					  (u8 *)fw->data, fw->size))
 		err = -EIO;
-
-	brcmf_exit("exit\n");
 
 	return err;
 }
@@ -3316,8 +3289,6 @@ static int brcmf_sdio_download_firmware(struct brcmf_sdio *bus,
 {
 	int bcmerror;
 	u32 rstvec;
-
-	brcmf_enter("enter\n");
 
 	sdio_claim_host(bus->sdiodev->func1);
 	brcmf_sdio_clkctl(bus, CLK_AVAIL, false);
@@ -3349,9 +3320,6 @@ static int brcmf_sdio_download_firmware(struct brcmf_sdio *bus,
 err:
 	brcmf_sdio_clkctl(bus, CLK_SDONLY, false);
 	sdio_release_host(bus->sdiodev->func1);
-
-	brcmf_exit("exit\n");
-
 	return bcmerror;
 }
 
@@ -4083,8 +4051,6 @@ static void brcmf_sdio_firmware_callback(struct device *dev, int err,
 	u32 nvram_len;
 	u8 saveclk;
 
-	brcmf_enter("enter\n");
-
 	brcmf_dbg(TRACE, "Enter: dev=%s, err=%d\n", dev_name(dev), err);
 
 	if (err)
@@ -4102,107 +4068,74 @@ static void brcmf_sdio_firmware_callback(struct device *dev, int err,
 		goto fail;
 	bus->alp_only = false;
 
-	brcmf_err("1\n");
-
 	/* Start the watchdog timer */
 	bus->sdcnt.tickcnt = 0;
 	brcmf_sdio_wd_timer(bus, true);
 
-	brcmf_err("2\n");
-
 	sdio_claim_host(sdiod->func1);
-
-	brcmf_err("3\n");
 
 	/* Make sure backplane clock is on, needed to generate F2 interrupt */
 	brcmf_sdio_clkctl(bus, CLK_AVAIL, false);
 	if (bus->clkstate != CLK_AVAIL)
 		goto release;
 
-	brcmf_err("4\n");
-
 	/* Force clocks on backplane to be sure F2 interrupt propagates */
 	saveclk = brcmf_sdiod_readb(sdiod, SBSDIO_FUNC1_CHIPCLKCSR, &err);
-	brcmf_err("5\n");
 	if (!err) {
-		brcmf_err("6\n");
 		brcmf_sdiod_writeb(sdiod, SBSDIO_FUNC1_CHIPCLKCSR,
 				   (saveclk | SBSDIO_FORCE_HT), &err);
 	}
-	brcmf_err("7\n");
 	if (err) {
-		brcmf_err("8\n");
 		brcmf_err("Failed to force clock for F2: err %d\n", err);
 		goto release;
 	}
-	brcmf_err("9\n");
 
 	/* Enable function 2 (frame transfers) */
 	brcmf_sdiod_writel(sdiod, core->base + SD_REG(tosbmailboxdata),
 			   SDPCM_PROT_VERSION << SMB_DATA_VERSION_SHIFT, NULL);
 
-	brcmf_err("10\n");
-
-	brcmf_sdio_get_console_addr(bus);
-	brcmf_sdio_readconsole(bus);
-
 	err = sdio_enable_func(sdiod->func2);
-
-	brcmf_err("11\n");
-
-	brcmf_sdio_get_console_addr(bus);
-	brcmf_sdio_readconsole(bus);
 
 	brcmf_dbg(INFO, "enable F2: err=%d\n", err);
 
 	/* If F2 successfully enabled, set core and enable interrupts */
 	if (!err) {
-		brcmf_err("12\n");
 		/* Set up the interrupt mask and enable interrupts */
 		bus->hostintmask = HOSTINTMASK;
 		brcmf_sdiod_writel(sdiod, core->base + SD_REG(hostintmask),
 				   bus->hostintmask, NULL);
 
-		brcmf_err("13\n");
+
 		brcmf_sdiod_writeb(sdiod, SBSDIO_WATERMARK, 8, &err);
 	} else {
-		brcmf_err("14\n");
 		/* Disable F2 again */
 		sdio_disable_func(sdiod->func2);
 		goto release;
 	}
-	brcmf_err("15\n");
 
 	if (brcmf_chip_sr_capable(bus->ci)) {
-		brcmf_err("16\n");
 		brcmf_sdio_sr_init(bus);
 	} else {
-		brcmf_err("17\n");
 		/* Restore previous clock setting */
 		brcmf_sdiod_writeb(sdiod, SBSDIO_FUNC1_CHIPCLKCSR,
 				   saveclk, &err);
 	}
-	brcmf_err("18\n");
 
 	if (err == 0) {
-		brcmf_err("19\n");
 		/* Allow full data communication using DPC from now on. */
 		brcmf_sdiod_change_state(bus->sdiodev, BRCMF_SDIOD_DATA);
 
-		brcmf_err("20\n");
 		err = brcmf_sdiod_intr_register(sdiod);
 		if (err != 0)
 			brcmf_err("intr register failed:%d\n", err);
 	}
-	brcmf_err("21\n");
 
 	/* If we didn't come up, turn off backplane clock */
 	if (err != 0)
 		brcmf_sdio_clkctl(bus, CLK_NONE, false);
 
-	brcmf_err("22\n");
 	sdio_release_host(sdiod->func1);
-	brcmf_err("23\n");
+
 	/* Assign bus interface call back */
 	sdiod->bus_if->dev = sdiod->dev;
 	sdiod->bus_if->ops = &brcmf_sdio_bus_ops;
@@ -4211,13 +4144,10 @@ static void brcmf_sdio_firmware_callback(struct device *dev, int err,
 
 	/* Attach to the common layer, reserve hdr space */
 	err = brcmf_attach(sdiod->dev, sdiod->settings);
-	brcmf_err("24\n");
 	if (err != 0) {
 		brcmf_err("brcmf_attach failed\n");
 		goto fail;
 	}
-
-	brcmf_exit("exit\n");
 
 	/* ready */
 	return;

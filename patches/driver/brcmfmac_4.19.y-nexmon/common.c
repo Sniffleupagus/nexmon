@@ -36,9 +36,6 @@ MODULE_AUTHOR("Broadcom Corporation");
 MODULE_DESCRIPTION("Broadcom 802.11 wireless LAN fullmac driver.");
 MODULE_LICENSE("Dual BSD/GPL");
 
-char *dbgspaces = "                                                            ";
-int dbgspacesidx = 60;
-
 #define BRCMF_DEFAULT_SCAN_CHANNEL_TIME	40
 #define BRCMF_DEFAULT_SCAN_UNASSOC_TIME	40
 
@@ -364,7 +361,7 @@ void __brcmf_err(const char *func, const char *fmt, ...)
 
 	vaf.fmt = fmt;
 	vaf.va = &args;
-	pr_err("%s%s: %pV", dbgspaces + dbgspacesidx, func, &vaf);
+	pr_err("%s: %pV", func, &vaf);
 
 	va_end(args);
 }
@@ -466,7 +463,6 @@ void brcmf_release_module_param(struct brcmf_mp_device *module_param)
 
 static int __init brcmf_common_pd_probe(struct platform_device *pdev)
 {
-	brcmf_enter("enter\n");
 	brcmf_dbg(INFO, "Enter\n");
 
 	brcmfmac_pdata = dev_get_platdata(&pdev->dev);
@@ -474,7 +470,6 @@ static int __init brcmf_common_pd_probe(struct platform_device *pdev)
 	if (brcmfmac_pdata->power_on)
 		brcmfmac_pdata->power_on();
 
-	brcmf_exit("exit\n");
 	return 0;
 }
 
@@ -499,8 +494,6 @@ static int __init brcmfmac_module_init(void)
 {
 	int err;
 
-	brcmf_enter("enter\n");
-
 	/* Get the platform data (if available) for our devices */
 	err = platform_driver_probe(&brcmf_pd, brcmf_common_pd_probe);
 	if (err == -ENODEV)
@@ -516,18 +509,14 @@ static int __init brcmfmac_module_init(void)
 			platform_driver_unregister(&brcmf_pd);
 	}
 
-	brcmf_exit("exit\n");
-
 	return err;
 }
 
 static void __exit brcmfmac_module_exit(void)
 {
-	brcmf_enter("enter\n");
 	brcmf_core_exit();
 	if (brcmfmac_pdata)
 		platform_driver_unregister(&brcmf_pd);
-	brcmf_exit("exit\n");
 }
 
 module_init(brcmfmac_module_init);

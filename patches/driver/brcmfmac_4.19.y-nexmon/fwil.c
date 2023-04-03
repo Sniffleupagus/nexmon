@@ -28,8 +28,6 @@
 #include "tracepoint.h"
 #include "fwil.h"
 #include "proto.h"
-#include "defs.h"
-#include "sdio.h"
 
 
 #define MAX_HEX_DUMP_LEN	64
@@ -111,11 +109,8 @@ brcmf_fil_cmd_data(struct brcmf_if *ifp, u32 cmd, void *data, u32 len, bool set)
 	struct brcmf_pub *drvr = ifp->drvr;
 	s32 err, fwerr;
 
-	brcmf_enter("enter %08x\n", cmd);
-
 	if (drvr->bus_if->state != BRCMF_BUS_UP) {
 		brcmf_err("bus is down. we have nothing to do.\n");
-		brcmf_exit("exit\n");
 		return -EIO;
 	}
 
@@ -129,19 +124,14 @@ brcmf_fil_cmd_data(struct brcmf_if *ifp, u32 cmd, void *data, u32 len, bool set)
 					     data, len, &fwerr);
 
 	if (err) {
-		brcmf_err("Failed: error=%d\n", err);
+		brcmf_dbg(FIL, "Failed: error=%d\n", err);
 	} else if (fwerr < 0) {
-		brcmf_err("Firmware error: %s (%d)\n",
+		brcmf_dbg(FIL, "Firmware error: %s (%d)\n",
 			  brcmf_fil_get_errstr((u32)(-fwerr)), fwerr);
 		err = -EBADE;
 	}
-	brcmf_sdio_readconsole(drvr->bus_if->bus_priv.sdio->bus);
-	if (ifp->fwil_fwerr) {
-		brcmf_exit("exit\n");
+	if (ifp->fwil_fwerr)
 		return fwerr;
-	}
-
-	brcmf_exit("exit\n");
 
 	return err;
 }
@@ -267,8 +257,6 @@ brcmf_fil_iovar_data_get(struct brcmf_if *ifp, char *name, void *data,
 	s32 err;
 	u32 buflen;
 
-	brcmf_enter("enter %s\n", name);
-
 	mutex_lock(&drvr->proto_block);
 
 	buflen = brcmf_create_iovar(name, data, len, drvr->proto_buf,
@@ -288,9 +276,6 @@ brcmf_fil_iovar_data_get(struct brcmf_if *ifp, char *name, void *data,
 			   min_t(uint, len, MAX_HEX_DUMP_LEN), "data\n");
 
 	mutex_unlock(&drvr->proto_block);
-
-	brcmf_exit("exit\n");
-
 	return err;
 }
 

@@ -906,8 +906,6 @@ static int brcmf_sdiod_probe(struct brcmf_sdio_dev *sdiodev)
 {
 	int ret = 0;
 
-	brcmf_enter("enter\n");
-
 	sdio_claim_host(sdiodev->func1);
 
 	ret = sdio_set_block_size(sdiodev->func1, SDIO_FUNC1_BLOCKSIZE);
@@ -948,8 +946,6 @@ static int brcmf_sdiod_probe(struct brcmf_sdio_dev *sdiodev)
 out:
 	if (ret)
 		brcmf_sdiod_remove(sdiodev);
-
-	brcmf_exit("exit\n");
 
 	return ret;
 }
@@ -1000,8 +996,6 @@ static int brcmf_ops_sdio_probe(struct sdio_func *func,
 	struct brcmf_sdio_dev *sdiodev;
 	struct brcmf_bus *bus_if;
 	struct device *dev;
-
-	brcmf_enter("enter\n");
 
 	brcmf_dbg(SDIO, "Enter\n");
 	brcmf_dbg(SDIO, "Class=%x\n", func->class);
@@ -1057,7 +1051,6 @@ static int brcmf_ops_sdio_probe(struct sdio_func *func,
 	}
 
 	brcmf_dbg(SDIO, "F2 init completed...\n");
-	brcmf_exit("exit\n");
 	return 0;
 
 fail:

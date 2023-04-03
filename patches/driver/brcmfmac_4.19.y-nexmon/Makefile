@@ -17,7 +17,8 @@
 
 ccflags-y += \
 	-I$(NEXMON_ROOT)/patches/driver/brcmfmac_4.19.y-nexmon	\
-	-I$(NEXMON_ROOT)/patches/driver/brcmfmac_4.19.y-nexmon/include
+	-I$(NEXMON_ROOT)/patches/driver/brcmfmac_4.19.y-nexmon/include \
+	-DDEBUG
 
 obj-$(CONFIG_BRCMFMAC) += brcmfmac.o
 brcmfmac-objs += \
@@ -45,6 +46,10 @@ brcmfmac-$(CONFIG_BRCMFMAC_PROTO_MSGBUF) += \
 brcmfmac-$(CONFIG_BRCMFMAC_SDIO) += \
 		sdio.o \
 		bcmsdh.o
+brcmfmac-$(CONFIG_BRCMFMAC_USB) += \
+		usb.o
+brcmfmac-$(CONFIG_BRCMFMAC_PCIE) += \
+		pcie.o
 brcmfmac-$(CONFIG_BRCM_TRACING) += \
 		tracepoint.o
 brcmfmac-$(CONFIG_OF) += \

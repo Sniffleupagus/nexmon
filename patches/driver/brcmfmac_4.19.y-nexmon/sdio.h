@@ -304,9 +304,6 @@ void brcmf_sdiod_intr_unregister(struct brcmf_sdio_dev *sdiodev);
 #define brcmf_sdiod_writeb(sdiodev, addr, v, ret) \
 	sdio_writeb((sdiodev)->func1, (v), (addr), (ret))
 
-
-int brcmf_sdio_readconsole(struct brcmf_sdio *bus);
-
 u32 brcmf_sdiod_readl(struct brcmf_sdio_dev *sdiodev, u32 addr, int *ret);
 void brcmf_sdiod_writel(struct brcmf_sdio_dev *sdiodev, u32 addr, u32 data,
 			int *ret);
