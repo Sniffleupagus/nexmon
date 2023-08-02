@@ -181,7 +181,6 @@ ifeq ($(shell uname -m),$(filter $(shell uname -m), armv6l armv7l aarch64))
 	$(Q)cp /lib/firmware/brcm/brcmfmac43430-sdio.bin brcmfmac43430-sdio.bin.orig
 	$(Q)cp /lib/firmware/brcm/brcmfmac43436s-sdio.bin brcmfmac43436s-sdio.bin.bin.orig 2>/dev/null || true
 	$(Q)cp /lib/firmware/brcm/brcmfmac43430-sdio.clm_blob brcmfmac43430-sdio.clm_blob 2>/dev/null || true
-	$(Q)cp /lib/firmware/brcm/brcmfmac43430-sdio.raspberrypi,3-model-b.clm_blob brcmfmac43430-sdio.raspberrypi,3-model-b.clm_blob 2>/dev/null || true
 else
 	$(warning Warning: Cannot backup the original firmware on this arch.)
 endif
@@ -193,6 +192,7 @@ ifeq ($(shell uname -m),$(filter $(shell uname -m), armv6l armv7l aarch64))
 	$(Q)cp brcmfmac43430-sdio.bin /lib/firmware/brcm/brcmfmac43436s-sdio.bin
 	$(Q)rm -rf /lib/firmware/brcm/brcmfmac43430-sdio.clm_blob
 	$(Q)rm -rf /lib/firmware/brcm/brcmfmac43430-sdio.raspberrypi,3-model-b.clm_blob
+	$(Q)rm -rf /lib/firmware/brcm/brcmfmac43430-sdio.raspberrypi,model-zero-w.clm_blob
 ifneq ("$(wildcard $(DRIVER_FOLDER_NAME)/brcmfmac.ko)", "")
 ifeq ($(shell lsmod | grep "^brcmfmac" | wc -l), 1)
 	@printf "\033[0;31m  UNLOADING\033[0m brcmfmac\n"
