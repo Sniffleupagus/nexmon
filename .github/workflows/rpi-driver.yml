@@ -124,8 +124,8 @@ jobs:
           cd "$NEXMON_ROOT"/patches/"$fw"/nexmon
           make
           mkdir -p "$NEXMON_ROOT"/build/fw/"$fw"
-          cp ./*.bin "$NEXMON_ROOT"/build/fw/"$fw"
-          cp ./*.h "$NEXMON_ROOT"/build/fw/"$fw"
+          cp ./*.bin "$NEXMON_ROOT"/build/fw/"$fw" || true
+          cp ./*.h "$NEXMON_ROOT"/build/fw/"$fw" || true
         done
     - name: Compress artifacts
       run: |
