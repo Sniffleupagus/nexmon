@@ -437,6 +437,7 @@ AT(CHIP_VER_BCM43436b0, FW_VER_ALL, 0x804328)
 AT(CHIP_VER_BCM4375b1, FW_VER_ALL, 0x89D0)
 AT(CHIP_VER_BCM43439a0, FW_VER_ALL, 0x8070F8)
 AT(CHIP_VER_BCM4398d0, FW_VER_ALL, 0x1C41C)
+AT(CHIP_VER_BCM6715b0, FW_VER_17_10_188_6401_r808804_ax86upro, 0x1708)
 int
 printf(const char *format, ...)
 RETURN_DUMMY
@@ -723,6 +724,7 @@ AT(CHIP_VER_BCM43438, FW_VER_7_45_41_26_r640327, 0x1CF3E)
 AT(CHIP_VER_BCM43430a1, FW_VER_7_45_41_26_r640327, 0x1CF3E)
 AT(CHIP_VER_BCM43430a1, FW_VER_7_45_41_46, 0x1D21A)
 AT(CHIP_VER_BCM43439a0, FW_VER_ALL, 0x851B64)
+AT(CHIP_VER_BCM6715b0, FW_VER_17_10_188_6401_r808804_ax86upro, 0x8E922C)
 void *
 wlc_bsscfg_find_by_wlcif(void *wlc, int wlcif)
 RETURN_DUMMY
@@ -1276,6 +1278,7 @@ RETURN_DUMMY
 
 AT(CHIP_VER_BCM4389c1, FW_VER_20_101_36_2, 0x283984)
 AT(CHIP_VER_BCM4398d0, FW_VER_24_671_6_9_r1031525, 0x32385C)
+AT(CHIP_VER_BCM6715b0, FW_VER_17_10_188_6401_r808804_ax86upro, 0x840F10)
 int
 wlc_doioctl(void *ctx, uint cmd, void *arg, uint len, void *wlcif)
 RETURN_DUMMY
@@ -1958,39 +1961,51 @@ RETURN_DUMMY
 
 AT(CHIP_VER_BCM4366c0, FW_VER_ALL, 0x1CED4)
 AT(CHIP_VER_BCM4375b1, FW_VER_18_41_113_sta, 0x1D7A2C)
+AT(CHIP_VER_BCM4398d0, FW_VER_ALL, 0x257730)
 void *
 wl_init_timer(void *wl, void (*fn)(void* arg), void *arg, const char *name)
 RETURN_DUMMY
 
 AT(CHIP_VER_BCM4366c0, FW_VER_ALL, 0x1CEBC)
 AT(CHIP_VER_BCM4375b1, FW_VER_18_41_113_sta, 0x1D7A48)
+AT(CHIP_VER_BCM4398d0, FW_VER_ALL, 0x257740)
 void
 wl_free_timer(void *wl, void *t)
 VOID_DUMMY
 
 AT(CHIP_VER_BCM4366c0, FW_VER_ALL, 0x1CD1C)
 AT(CHIP_VER_BCM4375b1, FW_VER_18_41_113_sta, 0x1D7A4E)
+AT(CHIP_VER_BCM4398d0, FW_VER_ALL, 0x257750)
 void
 wl_add_timer(void *wl, void *t, uint ms, int periodic)
 VOID_DUMMY
 
+AT(CHIP_VER_BCM4398d0, FW_VER_ALL, 0x257760)
+void
+wl_add_timer_us(void *wl, void *t, uint us, int periodic)
+VOID_DUMMY
+
 AT(CHIP_VER_BCM4366c0, FW_VER_ALL, 0x1CDC4)
 AT(CHIP_VER_BCM4375b1, FW_VER_18_41_113_sta, 0x1D7A58)
+AT(CHIP_VER_BCM4398d0, FW_VER_ALL, 0x257770)
 uint
 wl_del_timer(void *wl, void *t)
 RETURN_DUMMY
 
 AT(CHIP_VER_BCM4375b1, FW_VER_ALL, 0x66640)
+AT(CHIP_VER_BCM4398d0, FW_VER_ALL, 0xF1F50)
 bool
 hnd_timer_start_us(void *timer, uint32 us, bool periodic)
 RETURN_DUMMY
 
 AT(CHIP_VER_BCM4375b1, FW_VER_ALL, 0xFFBF4)
+AT(CHIP_VER_BCM4398d0, FW_VER_ALL, 0x1E9CEC)
 int
 wlc_rsdb_get_wlcs(void *wlc, void **wlc_2g, void **wlc_5g)
 RETURN_DUMMY
 
 AT(CHIP_VER_BCM4375b1, FW_VER_ALL, 0x762A4)
+AT(CHIP_VER_BCM4398d0, FW_VER_ALL, 0x106E04)
 void *
 wlc_find_wlc_for_chanspec(void *wlc, uint16 chanspec)
 RETURN_DUMMY
@@ -2007,6 +2022,11 @@ AT(CHIP_VER_BCM4398d0, FW_VER_24_671_6_9_r1031525, 0x3F913C)
 void
 hnd_tcam_load_default(unsigned int rambase)
 VOID_DUMMY
+
+AT(CHIP_VER_BCM6715b0, FW_VER_17_10_188_6401_r808804_ax86upro, 0x12CE9C)
+int
+wlc_bmac_process_ucode_sr(void *wlc_hw)
+RETURN_DUMMY
 
 #undef VOID_DUMMY
 #undef RETURN_DUMMY
