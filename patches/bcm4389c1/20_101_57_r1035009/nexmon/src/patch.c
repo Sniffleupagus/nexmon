@@ -37,8 +37,8 @@
 #include <firmware_version.h>   // definition of firmware version macros
 #include <patcher.h>            // macros used to create patches such as BLPatch, BPatch, ...
 
-extern unsigned char ucode_compressed_bin[];
-extern unsigned int ucode_compressed_bin_len;
+extern unsigned char ucode0_compressed_bin[];
+extern unsigned int ucode0_compressed_bin_len;
 extern unsigned char ucode1_compressed_bin[];
 extern unsigned int ucode1_compressed_bin_len;
 extern unsigned char ucode2_compressed_bin[];
@@ -57,10 +57,10 @@ __attribute__((at(WLC_UCODE_WRITE_BL_HOOK_ADDR, "", CHIP_VER_ALL, FW_VER_ALL)))
 BLPatch(wlc_ucode_write_compressed_args, wlc_ucode_write_compressed_args);
 
 // Update pointers to ucodes and ucodesizes
-__attribute__((at(UCODESTART_PTR, "", CHIP_VER_ALL, FW_VER_ALL)))
-GenericPatch4(ucode_start, ucode_compressed_bin);
-__attribute__((at(UCODESIZE_PTR, "", CHIP_VER_ALL, FW_VER_ALL)))
-GenericPatch4(ucode_len, &ucode_compressed_bin_len);
+__attribute__((at(UCODE0START_PTR, "", CHIP_VER_ALL, FW_VER_ALL)))
+GenericPatch4(ucode0_start, ucode0_compressed_bin);
+__attribute__((at(UCODE0SIZE_PTR, "", CHIP_VER_ALL, FW_VER_ALL)))
+GenericPatch4(ucode0_len, &ucode0_compressed_bin_len);
 
 __attribute__((at(UCODE1START_PTR, "", CHIP_VER_ALL, FW_VER_ALL)))
 GenericPatch4(ucode1_start, ucode1_compressed_bin);
@@ -83,7 +83,7 @@ __attribute__((at(TEMPLATERAM3START_PTR, "", CHIP_VER_ALL, FW_VER_ALL)))
 GenericPatch4(templateram3_bin, templateram3_bin);
 
 // do not enable mmu protection by overwriting BL to hnd_mmu_enable_protection
-__attribute__((at(0x275B06, "", CHIP_VER_BCM4389c1, FW_VER_20_101_36_2)))
+__attribute__((at(0x275B9E, "", CHIP_VER_BCM4389c1, FW_VER_20_101_57_r1035009)))
 __attribute__((naked))
 void
 no_mmu_protection_patch(void)

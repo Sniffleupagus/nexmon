@@ -37,59 +37,16 @@
 #include <firmware_version.h>   // definition of firmware version macros
 #include <patcher.h>            // macros used to create patches such as BLPatch, BPatch, ...
 
-extern unsigned char ucode_compressed_bin[];
-extern unsigned int ucode_compressed_bin_len;
-extern unsigned char ucode1_compressed_bin[];
-extern unsigned int ucode1_compressed_bin_len;
-extern unsigned char ucode2_compressed_bin[];
-extern unsigned int ucode2_compressed_bin_len;
-extern unsigned char templateram0_bin[];
-extern unsigned char templateram1_bin[];
-extern unsigned char templateram2_bin[];
-extern unsigned char templateram3_bin[];
+char datetime[] = DATETIME;
+__attribute__((at(DATETIME_PTR, "", CHIP_VER_BCM4389c1, FW_VER_ALL)))
+GenericPatch4(datetime_patch, datetime);
 
-// Reduce reclaimed area to reserve patch space
-__attribute__((at(HNDRTE_RECLAIM_3_END_PTR, "", CHIP_VER_ALL, FW_VER_ALL)))
-GenericPatch4(hndrte_reclaim_3_end, PATCHSTART);
-
-// Hook the call to wlc_ucode_write in wlc_ucode_download
-__attribute__((at(WLC_UCODE_WRITE_BL_HOOK_ADDR, "", CHIP_VER_ALL, FW_VER_ALL)))
-BLPatch(wlc_ucode_write_compressed_args, wlc_ucode_write_compressed_args);
-
-// Update pointers to ucodes and ucodesizes
-__attribute__((at(UCODESTART_PTR, "", CHIP_VER_ALL, FW_VER_ALL)))
-GenericPatch4(ucode_start, ucode_compressed_bin);
-__attribute__((at(UCODESIZE_PTR, "", CHIP_VER_ALL, FW_VER_ALL)))
-GenericPatch4(ucode_len, &ucode_compressed_bin_len);
-
-__attribute__((at(UCODE1START_PTR, "", CHIP_VER_ALL, FW_VER_ALL)))
-GenericPatch4(ucode1_start, ucode1_compressed_bin);
-__attribute__((at(UCODE1SIZE_PTR, "", CHIP_VER_ALL, FW_VER_ALL)))
-GenericPatch4(ucode1_len, &ucode1_compressed_bin_len);
-
-__attribute__((at(UCODE2START_PTR, "", CHIP_VER_ALL, FW_VER_ALL)))
-GenericPatch4(ucode2_start, ucode2_compressed_bin);
-__attribute__((at(UCODE2SIZE_PTR, "", CHIP_VER_ALL, FW_VER_ALL)))
-GenericPatch4(ucode2_len, &ucode2_compressed_bin_len);
-
-// Moving template ram to another place in the ucode region
-__attribute__((at(TEMPLATERAM0START_PTR, "", CHIP_VER_ALL, FW_VER_ALL)))
-GenericPatch4(templateram0_bin, templateram0_bin);
-__attribute__((at(TEMPLATERAM1START_PTR, "", CHIP_VER_ALL, FW_VER_ALL)))
-GenericPatch4(templateram1_bin, templateram1_bin);
-__attribute__((at(TEMPLATERAM2START_PTR, "", CHIP_VER_ALL, FW_VER_ALL)))
-GenericPatch4(templateram2_bin, templateram2_bin);
-__attribute__((at(TEMPLATERAM3START_PTR, "", CHIP_VER_ALL, FW_VER_ALL)))
-GenericPatch4(templateram3_bin, templateram3_bin);
-
-// do not enable mmu protection by overwriting BL to hnd_mmu_enable_protection
-__attribute__((at(0x275B06, "", CHIP_VER_BCM4389c1, FW_VER_20_101_36_2)))
-__attribute__((naked))
-void
-no_mmu_protection_patch(void)
-{
-    asm(
-         "nop\n"
-         "nop\n"
-         );
-}
+char version[] = "20.101.57 (wlan=r1035009 c1 release2 nexmon.org: " GIT_VERSION "-" BUILD_NUMBER ")";
+__attribute__((at(VERSION_PTR_1, "", CHIP_VER_BCM4389c1, FW_VER_ALL)))
+GenericPatch4(version_patch_1, version);
+__attribute__((at(VERSION_PTR_2, "", CHIP_VER_BCM4389c1, FW_VER_ALL)))
+GenericPatch4(version_patch_2, version);
+__attribute__((at(VERSION_PTR_3, "", CHIP_VER_BCM4389c1, FW_VER_ALL)))
+GenericPatch4(version_patch_3, version);
+__attribute__((at(VERSION_PTR_4, "", CHIP_VER_BCM4389c1, FW_VER_ALL)))
+GenericPatch4(version_patch_4, version);
