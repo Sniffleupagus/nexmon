@@ -15,7 +15,7 @@
  *                                                                         *
  * This file is part of NexMon.                                            *
  *                                                                         *
- * Copyright (c) 2023 NexMon Team                                          *
+ * Copyright (c) 2016 NexMon Team                                          *
  *                                                                         *
  * NexMon is free software: you can redistribute it and/or modify          *
  * it under the terms of the GNU General Public License as published by    *
@@ -32,22 +32,29 @@
  *                                                                         *
  **************************************************************************/
 
-#ifndef STRUCTS_COMMON_H
-#define STRUCTS_COMMON_H
+#ifndef STRUCTS_H
+#define STRUCTS_H
 
-#include <types.h>
+/* band types */
+#define WLC_BAND_AUTO       0   /* auto-select */
+#define WLC_BAND_5G     	1   /* 5 Ghz */
+#define WLC_BAND_2G     	2   /* 2.4 Ghz */
+#define WLC_BAND_ALL        3   /* all bands */
 
-struct sk_buf {
-};
-typedef struct sk_buff sk_buff;
-typedef struct sk_buff lbuf;
+#ifndef	PAD
+#define	_PADLINE(line)	pad ## line
+#define	_XSTR(line)	_PADLINE(line)
+#define	PAD		_XSTR(__LINE__)
+#endif
+
+#include "../structs.common.h"
 
 struct wl_info {
     uint32 unit;                      /* 0x000 */
-    uint32 PAD;                       /* 0x004 */
+    void *pub;                        /* 0x004 */
     struct wlc_info *wlc;             /* 0x008 */
     struct wlc_hw_info *wlc_hw;       /* 0x00c */
-    uint32 PAD;                       /* 0x010 */
+    struct hndrte_dev *dev;           /* 0x010 */
     uint32 PAD;                       /* 0x014 */
     uint32 PAD;                       /* 0x018 */
     uint32 PAD;                       /* 0x01c */
@@ -80,14 +87,15 @@ struct wl_info {
     uint32 PAD;                       /* 0x088 */
     uint32 PAD;                       /* 0x08c */
     uint32 PAD;                       /* 0x090 */
+    uint32 PAD;                       /* 0x094 */
 } __attribute__((packed));
 
 struct wlc_info {
-    uint32 PAD;                       /* 0x000 */
+    void *pub;                        /* 0x000 */
     void *osh;                        /* 0x004 */
     struct wl_info *wl;               /* 0x008 */
     uint32 PAD;                       /* 0x00c */
-    uint32 PAD;                       /* 0x010 */
+    struct d11regs *regs;             /* 0x010 */
     uint32 PAD;                       /* 0x014 */
     struct wlc_hw_info *hw;           /* 0x018 */
     uint32 PAD;                       /* 0x01c */
@@ -656,24 +664,13 @@ struct wlc_info {
     uint32 PAD;                       /* 0x8e8 */
     uint32 PAD;                       /* 0x8ec */
     uint32 PAD;                       /* 0x8f0 */
-    uint32 PAD;                       /* 0x8f4 */
-    uint32 PAD;                       /* 0x8f8 */
-    uint32 PAD;                       /* 0x8fc */
-    uint32 PAD;                       /* 0x900 */
-    uint32 PAD;                       /* 0x904 */
-    uint32 PAD;                       /* 0x908 */
-    uint32 PAD;                       /* 0x90c */
-    uint32 PAD;                       /* 0x910 */
-    uint32 PAD;                       /* 0x914 */
-    uint32 PAD;                       /* 0x918 */
-    uint32 PAD;                       /* 0x91c */
 } __attribute__((packed));
 
 struct wlc_hw_info {
     struct wlc_info *wlc;             /* 0x000 */
     uint32 PAD;                       /* 0x004 */
     void *osh;                        /* 0x008 */
-    uint32 unit;                      /* 0x00c */
+    uint32 PAD;                       /* 0x00c */
     uint32 PAD;                       /* 0x010 */
     uint32 PAD;                       /* 0x014 */
     uint32 PAD;                       /* 0x018 */
@@ -764,7 +761,7 @@ struct wlc_hw_info {
     uint32 PAD;                       /* 0x16c */
     uint32 PAD;                       /* 0x170 */
     uint32 PAD;                       /* 0x174 */
-    struct d11regs *regs;             /* 0x178 */
+    uint32 PAD;                       /* 0x178 */
     uint32 PAD;                       /* 0x17c */
     uint32 PAD;                       /* 0x180 */
     uint32 PAD;                       /* 0x184 */
@@ -772,7 +769,7 @@ struct wlc_hw_info {
     uint32 PAD;                       /* 0x18c */
     uint32 PAD;                       /* 0x190 */
     uint32 PAD;                       /* 0x194 */
-    uint32 PAD;                       /* 0x198 */
+    struct d11regs *regs;             /* 0x198 */
     uint32 PAD;                       /* 0x19c */
     uint32 PAD;                       /* 0x1a0 */
     uint32 PAD;                       /* 0x1a4 */
@@ -986,163 +983,48 @@ struct wlc_hw_info {
     uint32 PAD;                       /* 0x4e4 */
     uint32 PAD;                       /* 0x4e8 */
     uint32 PAD;                       /* 0x4ec */
+    uint32 PAD;                       /* 0x4f0 */
+    uint32 PAD;                       /* 0x4f4 */
+    uint32 PAD;                       /* 0x4f8 */
+    uint32 PAD;                       /* 0x4fc */
+    uint32 PAD;                       /* 0x500 */
+    uint32 PAD;                       /* 0x504 */
+    uint32 PAD;                       /* 0x508 */
+    uint32 PAD;                       /* 0x50c */
+    uint32 PAD;                       /* 0x510 */
+    uint32 PAD;                       /* 0x514 */
+    uint32 PAD;                       /* 0x518 */
+    uint32 PAD;                       /* 0x51c */
+    uint32 PAD;                       /* 0x520 */
+    uint32 PAD;                       /* 0x524 */
+    uint32 PAD;                       /* 0x528 */
+    uint32 PAD;                       /* 0x52c */
+    uint32 PAD;                       /* 0x530 */
+    uint32 PAD;                       /* 0x534 */
+    uint32 PAD;                       /* 0x538 */
+    uint32 PAD;                       /* 0x53c */
+    uint32 PAD;                       /* 0x540 */
+    uint32 PAD;                       /* 0x544 */
+    uint32 PAD;                       /* 0x548 */
+    uint32 PAD;                       /* 0x54c */
+    uint32 PAD;                       /* 0x550 */
+    uint32 PAD;                       /* 0x554 */
+    uint32 PAD;                       /* 0x558 */
+    uint32 PAD;                       /* 0x55c */
+    uint32 PAD;                       /* 0x560 */
+    uint32 PAD;                       /* 0x564 */
+    uint32 PAD;                       /* 0x568 */
+    uint32 PAD;                       /* 0x56c */
+    uint32 PAD;                       /* 0x570 */
+    uint32 PAD;                       /* 0x574 */
+    uint32 PAD;                       /* 0x578 */
+    uint32 PAD;                       /* 0x57c */
+    uint32 PAD;                       /* 0x580 */
+    uint32 PAD;                       /* 0x584 */
+    uint32 PAD;                       /* 0x588 */
+    uint32 PAD;                       /* 0x58c */
+    uint32 PAD;                       /* 0x590 */
+    uint32 PAD;                       /* 0x594 */
 } __attribute__((packed));
 
-struct d11regs {
-    uint32 PAD;                /* 0x000 */
-    uint32 PAD;                /* 0x004 */
-    uint32 PAD;                /* 0x008 */
-    uint32 PAD;                /* 0x00c */
-    uint32 PAD;                /* 0x010 */
-    uint32 PAD;                /* 0x014 */
-    uint32 PAD;                /* 0x018 */
-    uint32 PAD;                /* 0x01c */
-    uint32 PAD;                /* 0x020 */
-    uint32 PAD;                /* 0x024 */
-    uint32 PAD;                /* 0x028 */
-    uint32 PAD;                /* 0x02c */
-    uint32 PAD;                /* 0x030 */
-    uint32 PAD;                /* 0x034 */
-    uint32 PAD;                /* 0x038 */
-    uint32 PAD;                /* 0x03c */
-    uint32 PAD;                /* 0x040 */
-    uint32 PAD;                /* 0x044 */
-    uint32 PAD;                /* 0x048 */
-    uint32 PAD;                /* 0x04c */
-    uint32 PAD;                /* 0x050 */
-    uint32 PAD;                /* 0x054 */
-    uint32 PAD;                /* 0x058 */
-    uint32 PAD;                /* 0x05c */
-    uint32 PAD;                /* 0x060 */
-    uint32 PAD;                /* 0x064 */
-    uint32 PAD;                /* 0x068 */
-    uint32 PAD;                /* 0x06c */
-    uint32 PAD;                /* 0x070 */
-    uint32 PAD;                /* 0x074 */
-    uint32 PAD;                /* 0x078 */
-    uint32 PAD;                /* 0x07c */
-    uint32 PAD;                /* 0x080 */
-    uint32 PAD;                /* 0x084 */
-    uint32 PAD;                /* 0x088 */
-    uint32 PAD;                /* 0x08c */
-    uint32 PAD;                /* 0x090 */
-    uint32 PAD;                /* 0x094 */
-    uint32 PAD;                /* 0x098 */
-    uint32 PAD;                /* 0x09c */
-    uint32 PAD;                /* 0x0a0 */
-    uint32 PAD;                /* 0x0a4 */
-    uint32 PAD;                /* 0x0a8 */
-    uint32 PAD;                /* 0x0ac */
-    uint32 PAD;                /* 0x0b0 */
-    uint32 PAD;                /* 0x0b4 */
-    uint32 PAD;                /* 0x0b8 */
-    uint32 PAD;                /* 0x0bc */
-    uint32 PAD;                /* 0x0c0 */
-    uint32 PAD;                /* 0x0c4 */
-    uint32 PAD;                /* 0x0c8 */
-    uint32 PAD;                /* 0x0cc */
-    uint32 PAD;                /* 0x0d0 */
-    uint32 PAD;                /* 0x0d4 */
-    uint32 PAD;                /* 0x0d8 */
-    uint32 PAD;                /* 0x0dc */
-    uint32 PAD;                /* 0x0e0 */
-    uint32 PAD;                /* 0x0e4 */
-    uint32 PAD;                /* 0x0e8 */
-    uint32 PAD;                /* 0x0ec */
-    uint32 PAD;                /* 0x0f0 */
-    uint32 PAD;                /* 0x0f4 */
-    uint32 PAD;                /* 0x0f8 */
-    uint32 PAD;                /* 0x0fc */
-    uint32 PAD;                /* 0x100 */
-    uint32 PAD;                /* 0x104 */
-    uint32 PAD;                /* 0x108 */
-    uint32 PAD;                /* 0x10c */
-    uint32 PAD;                /* 0x110 */
-    uint32 PAD;                /* 0x114 */
-    uint32 PAD;                /* 0x118 */
-    uint32 PAD;                /* 0x11c */
-    uint32 PAD;                /* 0x120 */
-    uint32 PAD;                /* 0x124 */
-    uint32 PAD;                /* 0x128 */
-    uint32 PAD;                /* 0x12c */
-    uint32 PAD;                /* 0x130 */
-    uint32 PAD;                /* 0x134 */
-    uint32 PAD;                /* 0x138 */
-    uint32 PAD;                /* 0x13c */
-    uint32 PAD;                /* 0x140 */
-    uint32 PAD;                /* 0x144 */
-    uint32 PAD;                /* 0x148 */
-    uint32 PAD;                /* 0x14c */
-    uint32 PAD;                /* 0x150 */
-    uint32 PAD;                /* 0x154 */
-    uint32 PAD;                /* 0x158 */
-    uint32 PAD;                /* 0x15c */
-    uint32 objaddr;            /* 0x160 */
-    uint32 objdata;            /* 0x164 */
-    /* ... */
-} __attribute__((packed));
-
-struct ethernet_header {
-    uint8 dst[6];
-    uint8 src[6];
-    uint16 type;
-} __attribute__((packed));
-
-struct ipv6_header {
-    uint32 version_traffic_class_flow_label;
-    uint16 payload_length;
-    uint8 next_header;
-    uint8 hop_limit;
-    uint8 src_ip[16];
-    uint8 dst_ip[16];
-} __attribute__((packed));
-
-struct ip_header {
-    uint8 version_ihl;
-    uint8 dscp_ecn;
-    uint16 total_length;
-    uint16 identification;
-    uint16 flags_fragment_offset;
-    uint8 ttl;
-    uint8 protocol;
-    uint16 header_checksum;
-    union {
-        uint32 integer;
-        uint8 array[4];
-    } src_ip;
-    union {
-        uint32 integer;
-        uint8 array[4];
-    } dst_ip;
-} __attribute__((packed));
-
-struct udp_header {
-    uint16 src_port;
-    uint16 dst_port;
-    union {
-        uint16 length;          /* UDP: length of UDP header and payload */
-        uint16 checksum_coverage;   /* UDPLITE: checksum_coverage */
-    } len_chk_cov;
-    uint16 checksum;
-} __attribute__((packed));
-
-struct ethernet_ip_udp_header {
-    struct ethernet_header ethernet;
-    struct ip_header ip;
-    struct udp_header udp;
-} __attribute__((packed));
-
-struct ethernet_ipv6_udp_header {
-    struct ethernet_header ethernet;
-    struct ipv6_header ipv6;
-    struct udp_header udp;
-    uint8 payload[1];
-} __attribute__((packed));
-
-struct nexmon_header {
-    uint32 hooked_fct;
-    uint32 args[3];
-    uint8 payload[1];
-} __attribute__((packed));
-
-#endif /*STRUCTS_COMMON_H */
+#endif /*STRUCTS_H */

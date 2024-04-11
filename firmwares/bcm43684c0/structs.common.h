@@ -15,7 +15,7 @@
  *                                                                         *
  * This file is part of NexMon.                                            *
  *                                                                         *
- * Copyright (c) 2023 NexMon Team                                          *
+ * Copyright (c) 2024 NexMon Team                                          *
  *                                                                         *
  * NexMon is free software: you can redistribute it and/or modify          *
  * it under the terms of the GNU General Public License as published by    *
@@ -37,17 +37,120 @@
 
 #include <types.h>
 
-struct sk_buf {
-};
+/* lbuf version with BCMHWA, HWA_PKT_MACRO, and BCMPKTIDMAP */
+struct sk_buff {
+    uint32 pkttag[(32 + 3) / 4];
+    char *head;
+    char *end;
+    char *data;
+    uint16 len;
+    uint16 cfp_flowid;
+    union {
+        uint32 u32;
+        struct {
+            uint16 pktid;
+            uint8 refcnt;
+            uint8 poolid;
+        };
+    } mem;
+    uint32 flags;
+    union {
+        uint32 reset;
+        struct {
+            union {
+                uint16 dmapad;
+                uint16 rxcpl_id;
+                uint16 dma_index;
+            };
+            union {
+                uint8 dataOff;
+                uint8 hwa_rxOff;
+            };
+            uint8 ifidx;
+        };
+    };
+    union {
+        struct {
+            uint16 nextid;
+            uint16 linkid;
+        };
+        void * freelist;
+    };
+} __attribute__((packed));
+
 typedef struct sk_buff sk_buff;
 typedef struct sk_buff lbuf;
 
+struct osl_ext_timer {
+    uint32  tx_timer_id;                                    /* 0x000 */
+    char    *tx_timer_name;                                 /* 0x004 */
+    uint32  tx_timer_internal_remaining_ticks;              /* 0x008 */
+    uint32  tx_timer_internal_re_initialize_ticks;          /* 0x00c */
+    void    (*tx_timer_internal_timeout_function)(uint32);  /* 0x010 */
+    uint32  tx_timer_internal_timeout_param;                /* 0x014 */
+    void    *tx_timer_internal_active_next;                 /* 0x018 */
+    void    *tx_timer_internal_active_previous;             /* 0x01c */
+    void    **tx_timer_internal_list_head;                  /* 0x020 */
+    void    *tx_timer_created_next;                         /* 0x024 */
+    void    *tx_timer_created_previous;                     /* 0x028 */
+} __attribute__((packed));
+
+struct hndrte_timer
+{
+    struct osl_ext_timer timer;                             /* 0x000 */
+    uint32  *context;                                       /* 0x02c */
+    void    *data;                                          /* 0x030 */
+    void    (*mainfn)(struct hndrte_timer *timer);          /* 0x034 */
+    void    (*auxfn)(void *ctx);                            /* 0x038 */
+    uint32  usec;                                           /* 0x03c */
+    uint8   periodic;                                       /* 0x040 */
+    uint8   deleted;                                        /* 0x041 */
+    uint8   PAD;                                            /* 0x042 */
+    uint8   PAD;                                            /* 0x043 */
+    void    *dpc;                                           /* 0x044 */
+    void    *cpuutil;                                       /* 0x048 */
+} __attribute__((packed));
+typedef struct hndrte_timer hnd_timer;
+
+struct hndrte_dev {
+    char name[16];
+    uint32 devid;
+    uint32 flags;
+    union {
+        struct hnd_dev_ops *ops;
+        struct hnd_dev_ops *funcs;
+    };
+    void *softc;
+    struct hndrte_dev *next;
+    struct hndrte_dev *chained;
+    struct hndrte_dev_stats *stats;
+    void *commondata;
+    void *pdev;
+    void *priv;
+};
+typedef struct hndrte_dev hnd_dev;
+
+struct hnd_dev_ops {
+    void *(*probe)(struct hndrte_dev *dev, void *regs, uint bus, uint16 device, uint coreid, uint unit);
+    int (*open)(struct hndrte_dev *dev);
+    int (*close)(struct hndrte_dev *dev);
+    int (*xmit)(struct hndrte_dev *src, struct hndrte_dev *dev, struct sk_buff *lbuf);
+    int (*xmit_ctl)(struct hndrte_dev *src, struct hndrte_dev *dev, struct sk_buff *lbuf);
+    int (*recv)(struct hndrte_dev *src, struct hndrte_dev *dev, void *pkt);
+    int (*ioctl)(struct hndrte_dev *dev, uint32 cmd, void *buffer, int len, int *used, int *needed, int set);
+    void (*txflowcontrol) (struct hndrte_dev *dev, bool state, int prio);
+    void (*poll)(struct hndrte_dev *dev);
+    void (*wowldown) (struct hndrte_dev *src);
+    int32 (*flowring_link_update)(struct hndrte_dev *dev, uint16 flowid, uint8 op, uint8 *sa, uint8 *da, uint8 tid, uint8 *mode);
+    int (*cfp_flow_link)(struct hndrte_dev *dev, uint16 ringid, uint8 tid, uint8* da, uint8 op, uint8** tcb_state, uint16* cfp_flowid);
+};
+
 struct wl_info {
     uint32 unit;                      /* 0x000 */
-    uint32 PAD;                       /* 0x004 */
+    void *pub;                        /* 0x004 */
     struct wlc_info *wlc;             /* 0x008 */
-    struct wlc_hw_info *wlc_hw;       /* 0x00c */
-    uint32 PAD;                       /* 0x010 */
+    void *wlc_hw;                     /* 0x00c */
+    struct hndrte_dev *dev;           /* 0x010 */
     uint32 PAD;                       /* 0x014 */
     uint32 PAD;                       /* 0x018 */
     uint32 PAD;                       /* 0x01c */
@@ -83,13 +186,13 @@ struct wl_info {
 } __attribute__((packed));
 
 struct wlc_info {
-    uint32 PAD;                       /* 0x000 */
+    void *pub;                        /* 0x000 */
     void *osh;                        /* 0x004 */
     struct wl_info *wl;               /* 0x008 */
     uint32 PAD;                       /* 0x00c */
-    uint32 PAD;                       /* 0x010 */
+    struct d11regs *regs;             /* 0x010 */
     uint32 PAD;                       /* 0x014 */
-    struct wlc_hw_info *hw;           /* 0x018 */
+    void *hw;                         /* 0x018 */
     uint32 PAD;                       /* 0x01c */
     uint32 PAD;                       /* 0x020 */
     uint32 PAD;                       /* 0x024 */
@@ -667,6 +770,10 @@ struct wlc_info {
     uint32 PAD;                       /* 0x914 */
     uint32 PAD;                       /* 0x918 */
     uint32 PAD;                       /* 0x91c */
+    uint32 PAD;                       /* 0x920 */
+    uint32 PAD;                       /* 0x924 */
+    uint32 PAD;                       /* 0x928 */
+    uint32 PAD;                       /* 0x92c */
 } __attribute__((packed));
 
 struct wlc_hw_info {
@@ -764,21 +871,19 @@ struct wlc_hw_info {
     uint32 PAD;                       /* 0x16c */
     uint32 PAD;                       /* 0x170 */
     uint32 PAD;                       /* 0x174 */
-    struct d11regs *regs;             /* 0x178 */
+    uint32 PAD;                       /* 0x178 */
     uint32 PAD;                       /* 0x17c */
     uint32 PAD;                       /* 0x180 */
     uint32 PAD;                       /* 0x184 */
     uint32 PAD;                       /* 0x188 */
     uint32 PAD;                       /* 0x18c */
     uint32 PAD;                       /* 0x190 */
-    uint32 PAD;                       /* 0x194 */
+    struct d11regs *regs;             /* 0x194 */
     uint32 PAD;                       /* 0x198 */
     uint32 PAD;                       /* 0x19c */
     uint32 PAD;                       /* 0x1a0 */
     uint32 PAD;                       /* 0x1a4 */
-    uint32 PAD;                       /* 0x1a8 */
-    uint32 PAD;                       /* 0x1ac */
-    uint32 PAD;                       /* 0x1b0 */
+    void *bandstate[3];               /* 0x1a8 */
     uint32 PAD;                       /* 0x1b4 */
     uint32 PAD;                       /* 0x1b8 */
     uint32 PAD;                       /* 0x1bc */
@@ -986,6 +1091,43 @@ struct wlc_hw_info {
     uint32 PAD;                       /* 0x4e4 */
     uint32 PAD;                       /* 0x4e8 */
     uint32 PAD;                       /* 0x4ec */
+    uint32 PAD;                       /* 0x4f0 */
+    uint32 PAD;                       /* 0x4f4 */
+    uint32 PAD;                       /* 0x4f8 */
+    uint32 PAD;                       /* 0x4fc */
+    uint32 PAD;                       /* 0x500 */
+    uint32 PAD;                       /* 0x504 */
+    uint32 PAD;                       /* 0x508 */
+    uint32 PAD;                       /* 0x50c */
+    uint32 PAD;                       /* 0x510 */
+    uint32 PAD;                       /* 0x514 */
+    uint32 PAD;                       /* 0x518 */
+    uint32 PAD;                       /* 0x51c */
+    uint32 PAD;                       /* 0x520 */
+    uint32 PAD;                       /* 0x524 */
+    uint32 PAD;                       /* 0x528 */
+    uint32 PAD;                       /* 0x52c */
+    uint32 PAD;                       /* 0x530 */
+    uint32 PAD;                       /* 0x534 */
+    uint32 PAD;                       /* 0x538 */
+    uint32 PAD;                       /* 0x53c */
+    uint32 PAD;                       /* 0x540 */
+    uint32 PAD;                       /* 0x544 */
+    uint32 PAD;                       /* 0x548 */
+    uint32 PAD;                       /* 0x54c */
+    uint32 PAD;                       /* 0x550 */
+    uint32 PAD;                       /* 0x554 */
+    uint32 PAD;                       /* 0x558 */
+    uint32 PAD;                       /* 0x55c */
+    uint32 PAD;                       /* 0x560 */
+    uint32 PAD;                       /* 0x564 */
+    uint32 PAD;                       /* 0x568 */
+    uint32 PAD;                       /* 0x56c */
+    uint32 PAD;                       /* 0x570 */
+    uint32 PAD;                       /* 0x574 */
+    uint32 PAD;                       /* 0x578 */
+    uint32 PAD;                       /* 0x57c */
+    uint32 PAD;                       /* 0x580 */
 } __attribute__((packed));
 
 struct d11regs {
