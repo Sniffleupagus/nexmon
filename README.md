@@ -125,7 +125,7 @@ To be able to communicate with the firmware without root priviledges, we created
 * Make sure the following commands are executed as root: `sudo su`
 * Upgrade your Raspbian installation: `apt-get update && apt-get upgrade`
 * Install the kernel headers to build the driver and some dependencies: `sudo apt install raspberrypi-kernel-headers git libgmp3-dev gawk qpdf bison flex make autoconf libtool texinfo gcc-arm-none-eabi wl libfl-dev g++ xxd`
-* Clone our repository: `git clone https://github.com/seemoo-lab/nexmon.git`
+* Clone our repository: `git clone https://github.com/DrSchottky/nexmon.git`
 * Go into the root directory of our repository: `cd nexmon`
 * Then you can setup the build environment for compiling firmware patches
   * Setup the build environment: `source setup_env.sh`
